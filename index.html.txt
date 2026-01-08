@@ -1,0 +1,34 @@
+fill="#ffffff"
+        stroke="#000"
+        stroke-width="2"/>
+
+      <!-- PARCHES -->
+      <g id="patches"></g>
+    </svg>
+  </div>
+
+  <div class="panel">
+    <button onclick="nuevoParche()">➕ Añadir trozo</button>
+    <button onclick="borrar()">🗑 Eliminar</button>
+
+    <label>Color
+      <input type="color" onchange="color(this.value)">
+    </label>
+
+    <label>Textura
+      <input type="file" accept="image/*" onchange="textura(event)">
+    </label>
+
+    <button onclick="guardar()">💾 Guardar proyecto</button>
+    <button onclick="cargar()">📂 Cargar proyecto</button>
+    <button onclick="exportar()">🖼 Exportar PNG</button>
+  </div>
+</main>
+
+<footer>
+  <p>Mockup Tool — GitHub Pages</p>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>

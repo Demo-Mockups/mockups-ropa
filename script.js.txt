@@ -1,0 +1,141 @@
+const svg = document.getElementById("svg");
+const patches = document.getElementById("patches");
+const defs = svg.querySelector("defs");
+
+let seleccionado = null;
+let inicio = null;
+
+function nuevoParche() {
+  svg.onmousedown = iniciar;
+  svg.onmousemove = dibujar;
+  svg.onmouseup = terminar;
+}
+
+function iniciar(e) {
+  const p = pos(e);
+  inicio = p;
+
+  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+  const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  rect.setAttribute("x", p.x);
+  rect.setAttribute("y", p.y);
+  rect.setAttribute("width", 1);
+  rect.setAttribute("height", 1);
+  rect.setAttribute("fill", "#3498db");
+
+  const stitch = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+  stitch.setAttribute("x", p.x);
+  stitch.setAttribute("y", p.y);
+  stitch.setAttribute("width", 1);
+  stitch.setAttribute("height", 1);
+  stitch.setAttribute("fill", "none");
+  stitch.setAttribute("stroke", "#000");
+  stitch.setAttribute("stroke-dasharray", "4 3");
+
+  g.append(rect, stitch);
+  g.onclick = () => seleccionado = g;
+
+  patches.appendChild(g);
+  seleccionado = g;
+}
+
+function dibujar(e) {
+  if (!inicio || !seleccionado) return;
+  const p = pos(e);
+  const [rect, stitch] = seleccionado.children;
+
+  rect.setAttribute("width", p.x - inicio.x);
+  rect.setAttribute("height", p.y - inicio.y);
+  stitch.setAttribute("width", p.x - inicio.x);
+  stitch.setAttribute("height", p.y - inicio.y);
+}
+
+function terminar() {
+  svg.onmousedown = null;
+  svg.onmousemove = null;
+  svg.onmouseup = null;
+  inicio = null;
+}
+
+function color(c) {
+  if (seleccionado)
+    seleccionado.children[0].setAttribute("fill", c);
+}
+
+function textura(e) {
+  if (!seleccionado) return;
+  const file = e.target.files[0];
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    const id = "tex" + Date.now();
+    const pat = document.createElementNS("http://www.w3.org/2000/svg", "pattern");
+    pat.setAttribute("id", id);
+    pat.setAttribute("patternUnits", "userSpaceOnUse");
+    pat.setAttribute("width", 100);
+    pat.setAttribute("height", 100);
+
+    const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    img.setAttributeNS("http://www.w3.org/1999/xlink", "href", reader.result);
+    img.setAttribute("width", 100);
+    img.setAttribute("height", 100);
+
+    pat.appendChild(img);
+    defs.appendChild(pat);
+    seleccionado.children[0].setAttribute("fill", `url(#${id})`);
+  };
+
+  reader.readAsDataURL(file);
+}
+
+function borrar() {
+  if (seleccionado) {
+    seleccionado.remove();
+    seleccionado = null;
+  }
+}
+
+/* ===== GUARDAR / CARGAR ===== */
+function guardar() {
+  localStorage.setItem("mockup", patches.innerHTML);
+  alert("Proyecto guardado");
+}
+
+function cargar() {
+  const data = localStorage.getItem("mockup");
+  if (data) {
+    patches.innerHTML = data;
+    [...patches.children].forEach(g => g.onclick = () => seleccionado = g);
+  }
+}
+
+/* ===== EXPORTAR PNG ===== */
+function exportar() {
+  const xml = new XMLSerializer().serializeToString(svg);
+  const svg64 = btoa(unescape(encodeURIComponent(xml)));
+  const img = new Image();
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 600;
+    canvas.height = 800;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(img, 0, 0, 600, 800);
+
+    const a = document.createElement("a");
+    a.download = "mockup.png";
+    a.href = canvas.toDataURL("image/png");
+    a.click();
+  };
+
+  img.src = "data:image/svg+xml;base64," + svg64;
+}
+
+function pos(e) {
+  const r = svg.getBoundingClientRect();
+  return {
+    x: (e.clientX - r.left) * (300 / r.width),
+    y: (e.clientY - r.top) * (400 / r.height)
+  };
+}

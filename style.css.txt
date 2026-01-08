@@ -1,0 +1,44 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #eaeaea;
+  text-align: center;
+}
+
+header {
+  background: #111;
+  color: white;
+  padding: 20px;
+}
+
+main {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 20px;
+  flex-wrap: wrap;
+}
+
+.canvas {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+svg {
+  width: 300px;
+  cursor: crosshair;
+}
+
+.panel {
+  background: white;
+  padding: 20px;
+  width: 230px;
+  border-radius: 10px;
+}
+
+.panel button, .panel label {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
